@@ -1,59 +1,47 @@
 package ParkingLot;
 
-import ParkingLot.Vehicle.VehicleType;
 import java.util.ArrayList;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ParkingLevel {
 
-    private static final Logger log = LoggerFactory.getLogger(ParkingLevel.class);
-    private Integer floor;
-    List<ParkingSpot> spots;
+    private List<ParkingSpot> parkingSpots;
 
-    public ParkingLevel(Integer floor, Integer numberOfSpots) {
-        this.floor = floor;
-        this.spots = new ArrayList<>(numberOfSpots);
-        // Assign spots in ratio of 50:40:10 for bikes, cars and trucks
-        double bikes = 0.50;
-        double cars = 0.40;
+    public ParkingLevel(int numOfSpots) {
+        parkingSpots = new ArrayList<>(numOfSpots);
 
-        int numBikes = (int) (numberOfSpots * bikes);
-        int numCars = (int) (numberOfSpots * cars);
-        int numTrucks = (numberOfSpots - numBikes - numCars);
+        double bikes = 0.5;
+        double cars = 0.3;
 
-        for(int i=1; i<= numBikes; i++) {
-            spots.add(new ParkingSpot(i, VehicleType.MOTORCYCLE));
-        }
-        for(int i=numBikes+1; i<= numBikes + numCars; i++) {
-            spots.add(new ParkingSpot(i, VehicleType.CAR));
+        int numOfBikes = (int) (bikes * numOfSpots);
+        int numOfCars = (int) (cars * numOfSpots);
+
+        for (int i = 1; i <= numOfBikes; i++) {
+            parkingSpots.add(new ParkingSpot(i, VehicleType.BIKE));
         }
 
-        for(int i=numBikes+numCars+1; i<= numberOfSpots; i++) {
-            spots.add(new ParkingSpot(i, VehicleType.TRUCK));
+        for (int i = numOfBikes + 1; i <= numOfCars + numOfBikes; i++) {
+            parkingSpots.add(new ParkingSpot(i, VehicleType.CAR));
+        }
+
+        for (int i = numOfCars + numOfBikes + 1; i <= numOfSpots; i++) {
+            parkingSpots.add(new ParkingSpot(i, VehicleType.TRUCK));
         }
     }
 
-    public synchronized boolean parkVehicle(Vehicle vehicle) {
-        for (ParkingSpot spot : spots) {
-            if (spot.isAvailable() && spot.getVehicleType().equals(vehicle.getType())) {
-               boolean isParked =  spot.park(vehicle);
-               if(!isParked) {
-                   System.out.println("Vehicle not parked " + vehicle.toString());
-                   return false;
-               }
-                System.out.println("Vehicle parked");
-               return true;
+    public int parkVehicle(Vehicle vehicle) {
+        for (ParkingSpot spot : parkingSpots) {
+            int spotNumber = spot.park(vehicle);
+            if (spotNumber != -1) {
+                return spotNumber;
             }
         }
-        return false;
+        return -1;
     }
 
-    public synchronized boolean unParkVehicle(Vehicle vehicle) {
-        for (ParkingSpot spot : spots) {
-            if (!spot.isAvailable() && spot.getParkedVehicle().equals(vehicle)) {
-                spot.release();
+    public boolean unParkVehicle(Vehicle vehicle) {
+        for (ParkingSpot spot : parkingSpots) {
+            if (spot.release(vehicle)) {
                 return true;
             }
         }
@@ -61,12 +49,21 @@ public class ParkingLevel {
     }
 
     public void displayAvailableSpots() {
-        for (ParkingSpot spot : spots) {
-            if (spot.isAvailable()) {
-                System.out.println(
-                    "Spot " + spot.getSpotNumber() + " is available at level  " + this.floor + " for vehicle type "
-                        + spot.getVehicleType());
+        for (ParkingSpot spot : parkingSpots) {
+            if (spot.isSpotFree()) {
+                System.out.println("Spot is free at " + spot.getSpotNumber() + " for vehicle "
+                    + spot.getVehicleType());
             }
         }
+    }
+
+    public int getNumberOfFreeSpots() {
+        int freeSpots = 0;
+        for(ParkingSpot spot: parkingSpots) {
+            if(spot.isSpotFree()) {
+                freeSpots++;
+            }
+        }
+        return freeSpots;
     }
 }

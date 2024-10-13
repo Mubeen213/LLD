@@ -1,21 +1,13 @@
 package ParkingLot;
 
 
-import ParkingLot.Vehicle.VehicleType;
-
 public class ParkingSpot {
 
-    private Integer spotNumber;
+    private int spotNumber;
     private VehicleType vehicleType;
     private Vehicle parkedVehicle;
 
-    public ParkingSpot(Integer spotNumber, VehicleType vehicleType) {
-        this.spotNumber = spotNumber;
-        this.vehicleType = vehicleType;
-        parkedVehicle = null;
-    }
-
-    public Integer getSpotNumber() {
+    public int getSpotNumber() {
         return spotNumber;
     }
 
@@ -27,25 +19,33 @@ public class ParkingSpot {
         return parkedVehicle;
     }
 
-    public synchronized Boolean isAvailable() {
+    public ParkingSpot(int spotNumber, VehicleType vehicleType) {
+        this.spotNumber = spotNumber;
+        this.vehicleType = vehicleType;
+    }
+
+    public boolean isSpotFree() {
         return parkedVehicle == null;
     }
 
-    public synchronized boolean park(Vehicle vehicle) {
-        if (!isAvailable()) {
-            System.out.println("Spot is not available");
-            return false;
-        }
+    public synchronized int park(Vehicle vehicle) {
         if (!vehicle.getType().equals(vehicleType)) {
-            System.out.println("Spot not available for  vehicle type " + vehicle.getType());
-            return false;
+            return -1;
+        }
+        if (!isSpotFree()) {
+            return -1;
         }
         this.parkedVehicle = vehicle;
-        return true;
+        return this.spotNumber;
     }
 
-    public synchronized void release() {
-        this.parkedVehicle = null;
+    public synchronized boolean release(Vehicle vehicle) {
+        if (vehicle.equals(this.parkedVehicle)) {
+            this.parkedVehicle = null;
+            return true;
+        }
+        return false;
     }
+
 
 }

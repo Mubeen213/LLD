@@ -1,52 +1,55 @@
 package ParkingLot;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 public class ParkingLot {
 
-    private static volatile ParkingLot instance;
-    private List<ParkingLevel> levels;
+
+    Map<Integer,ParkingLevel> parkingLevels;
 
     private ParkingLot() {
-        this.levels = new ArrayList<>();
+        this.parkingLevels = new HashMap<>();
+    }
+
+    private static final class InstanceHolder {
+        private static final ParkingLot instance = new ParkingLot();
     }
 
     public static ParkingLot getInstance() {
-
-        if (instance == null) {
-            synchronized (ParkingLot.class) {
-                if (instance == null) {
-                    instance = new ParkingLot();
-                }
-            }
-        }
-        return instance;
+        return InstanceHolder.instance;
     }
 
-    public void addLevels(ParkingLevel level) {
-        levels.add(level);
+    public void addLevel(ParkingLevel level) {
+        parkingLevels.put(parkingLevels.size() + 1, level);
     }
 
-    public boolean parkVehicle(Vehicle vehicle) {
-        for (ParkingLevel level : levels) {
-            if (level.parkVehicle(vehicle)) {
-                return true;
-            }
+    public int parkVehicle(Vehicle vehicle) {
+        for (ParkingLevel level : parkingLevels.values()) {
+            return level.parkVehicle(vehicle);
         }
-        return false;
+        return -1;
     }
 
     public boolean unParkVehicle(Vehicle vehicle) {
-        for (ParkingLevel level : levels) {
-            level.unParkVehicle(vehicle);
+        for (ParkingLevel level : parkingLevels.values()) {
+            return level.unParkVehicle(vehicle);
         }
         return false;
     }
 
-    public void displayAvailability() {
-        for (ParkingLevel level : levels) {
-            level.displayAvailableSpots();
+    public void displayEmptySpots() {
+       for(ParkingLevel level: parkingLevels.values()) {
+           level.displayAvailableSpots();
+       }
+    }
+
+    public int getFreeSpotsAtGivenLevel(int level) {
+        ParkingLevel parkingLevel = parkingLevels.get(level);
+        if(Objects.isNull(parkingLevel)) {
+            System.out.println("Level does not exist");
         }
+        return parkingLevel.getNumberOfFreeSpots();
     }
 }

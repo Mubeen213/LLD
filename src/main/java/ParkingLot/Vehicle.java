@@ -14,18 +14,13 @@ public abstract class Vehicle {
         return vehicleType;
     }
 
-    enum VehicleType {
-        MOTORCYCLE,
-        CAR,
-        TRUCK
-    }
 }
 
 
-class MotorCycle extends Vehicle {
+class Bike extends Vehicle {
 
-    public MotorCycle(String numberPlate) {
-        super(numberPlate, VehicleType.MOTORCYCLE);
+    public Bike(String numberPlate) {
+        super(numberPlate, VehicleType.BIKE);
     }
 }
 
